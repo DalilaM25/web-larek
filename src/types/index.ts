@@ -22,7 +22,7 @@ export interface IUser {
 export interface IAppData {
     catalog: ICard[]; 
     basket: ICard[]; 
-    order: IOrder | null; 
+    order: IUser | null; 
 }
 
 //интерфейс окна формы

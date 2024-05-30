@@ -1,6 +1,6 @@
 # Проектная работа "Веб-ларек"
 
-Проект - одностраничный сайт осуществляющий возможность просмотра карточек с товарами для веб-разработчиков и последующего оформления. Реализует MVP паттерн.
+Проект - одностраничный сайт осуществляющий возможность просмотра карточек с товарами для веб-разработчиков и последующего оформления заказа. Реализует MVP паттерн.
 
 Стек: HTML, SCSS, TS, Webpack
 
@@ -51,7 +51,7 @@ export type Category =  'софт-скил' | 'другое' | 'дополнит
 ```
 Интерфейс карточки товара
 ```
-export interface ICard {
+interface ICard {
     id: string;
     description: string;
     image: string;
@@ -63,7 +63,7 @@ export interface ICard {
 ```
 Интерфейс данных пользователя
 ```
-export interface IUser {
+interface IUser {
     adress: string;
     email: string;
     telephone: string;
@@ -72,7 +72,7 @@ export interface IUser {
 ```
 Интерфейс данных приложения
 ```
-export interface IAppData {
+interface IAppData {
     catalog: ICard[]; 
     basket: ICard[]; 
     order: IOrder | null; 
@@ -80,35 +80,35 @@ export interface IAppData {
 ```
 Интерфейс модального окна оформления заказа
 ```
-export interface IOrderForm {
+interface IOrderForm {
     address: string; 
     payment: string; 
 }
 ```
 Интерфейс 2 шага оформления заказа
 ```
-export interface IContactForm {
+interface IContactForm {
     email: string; 
     phone: string; 
 }
 ```
 Интерфейс заказа
 ```
-export interface IOrder extends IOrderForm, IContactForm {
+interface IOrder extends IOrderForm, IContactForm {
     items: string[]; 
     total: number; 
 }
 ```
 Интерфейс корзины
 ```
-export interface IBasket {
+interface IBasket {
     items: HTMLElement[]; 
     price: number; 
 }
 ```
 Интерфейс успешное оформление заказа
 ```
-export interface IOrderSuccess {
+interface IOrderSuccess {
     id: string; 
     count: number; 
 }
@@ -149,11 +149,24 @@ export interface IOrderSuccess {
 
 #### Класс Model 
 Класс для слоя данных. Связывает данные и события о которых нужно уведомлять подписчиков.
+Конструктор принимает данные `data: T` и события `events: IEvents`. Есть метод `сhangeEmitter` - вызывает метод emit базового класса Events и сообщает об изменении данных.
 
 ### Слой данных
 
 #### Класс AppData
-Класс для хранения данных и работы с данными. Позволяет получать, хранить, удалять данные, а так же осуществлять другие необходимые действия, которые станут необходимы в ходе реализации приложения.
+Класс для хранения данных и работы с данными. Позволяет получать, хранить, удалять данные, а так же осуществлять другие необходимые действия, которые станут необходимы в ходе реализации приложения. Наследует класс Model.
+Свойства:
+- `сatalog: ICard[]` - массив карточек товаров
+- `basket: ICard[]` - массив карточек в корзине
+- `order: IOrder` - заказ для отправки на сервер
+Методы:
+    `setCatalog(items: ICard[]): void` - добавляет карточки товаров в массив
+    `addProduct(item: ICard): void`- добавляет товар в корзину
+    `removeProduct(id: string): void`- удаляет товар из корзины
+    `resetBasket(): void` - очищает всю корзину
+    `countBasket(): void` - считает число товаров в корзине
+    `priceBasket(): void` - считает общую стоимость товаров в корзине
+    `setOrder(): void`- сохраняет данные заказа
 
 ### Слой представления
 
@@ -163,31 +176,88 @@ export interface IOrderSuccess {
 Конструктор принимает:
 - `container: HTMLElement` — контейнер для вставки карточек
 - `events: IEvents` — объект событий
+Метод 
+`set catalog(items: HTMLElement[])` — добавляет каталог товаров на главной странице
 
 #### Класс Card
 
 Используется для управления отображением данных в карточке товара. Наследует класс Component. 
+Конструктор принимает:
+- `container: HTMLElement` — контейнер для вставки карточки
+Свойства:
+- `_title: HTMLElement` — наименование товара
+- `_image: HTMLImageElement` — изображение товара
+- `_price: HTMLElement` — цена товара
+- `_category: HTMLElement` — категория товара
+Методы:
+- `set title(value: string)` — установить название 
+- `set image(value: string)` — установить изображение
+- `set price(value: number)` — установить цену
+- `set category(value: string)` — установить категорию 
 
 #### Класс Basket
 
 Компонент отображения корзины приложения. Устанавливает в разметку суммарную цену и элементы с товарами. Наследует класс Component. 
+Конструктор принимает:
+- `container: HTMLElement` — контейнер для вставки данных
+- `events: EventEmitter` — объект событий
+Свойства:
+- `productList: HTMLElement[]` — массив элементов в корзине
+- `price: HTMLElement` — элемент с финальной ценой
+- `button: HTMLButtonElement` — элемент кнопки
+Методы:
+- `set productList(items: HTMLElement[])` — установить список элементов корзины
+- `set price(price: number)` — установить общую стоимость в разметку
 
 #### Класс Form 
 
 Класс для работы с формами. Предоставляет функционал для проверки форм, валидации, рендера результата.
+Свойства:
+- `_submit: HTMLButtonElement` — кнопка далее
+- `_errors: HTMLElement` — элемент для отображения ошибки
+Методы:
+`set valid(value: boolean): void` - установка значения валидности
+`set errors(value: string): void` - передача ошибок в форме
+`render(): void` - отрисовка формы
 
 #### Класс OrderForm 
 
 Класс для работы с формой заказа товара. Расширяет класс Form.
-
+Свойства класса:
+- `_buttons: HTMLButtonElement[]` — кнопки выбора оплаты
+Методы:
+- `set payment(name: string)` — устанавливает выбранный способ оплаты
+- `set address(value: string)` — устанавливает адрес доставки
 #### Класс ContactForm 
 
 Класс для работы с формой заказа товара (2 этап - заполнения контактных данных). Расширяет класс Form.
+Свойства:
+- `nextButton: HTMLButtonElement` — кнопка закрытия модального окна при успешном заказа
+Методы:
+- `set email(value: string): void` — устанавливает email
+- `set phone(value: string): void` — устанавливает телефон
 
 #### Класс OrderSuccess
 
 Используется для отображения финального сообщения об успешном оформлении заказа. 
+Конструктор принимает:
+- `container: HTMLFormElement`
+- `events: IEvents`
+Свойства:
+- `close: HTMLElement` — кнопка закрытия окна
+- `synapse: HTMLElement` — общее число синапсов
+Методы:
+- `set synapse(synapse: number)` — устанавливает списанное число синапсов
 
 #### Класс Modal 
 
 Класс для работы с модальными окнами. Класс используется для отображения, открытия и закрытия  модального окна.
+Конструктор принимает:
+- `container: HTMLFormElement` — контейнер для вставки данных
+- `events: IEvents` — объект событий
+Свойства:
+- `_submit: HTMLButtonElement` — кнопка далее
+Методы:
+    `set content(value: HTMLElement): void` - устанавливает значения в модальном окне
+    `open(): void` - открыть модальное окно
+    `close(): void` - закрыть модальное окно
