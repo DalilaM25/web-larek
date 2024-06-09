@@ -1,61 +1,83 @@
-export type Category =  'софт-скил' | 'другое' | 'дополнительное' | 'кнопка' | 'хард-скил';
+export type CategoryColorsList =  'софт-скил' | 'хард-скил' | 'дополнительное' | 'другое' | 'кнопка' ;
 
-//Интерфейс карточки товара
-export interface ICard {
+//товар
+export interface IProduct {
+    title: string;
     id: string;
+    category: CategoryColorsList;
     description: string;
     image: string;
-    title: string;
-    category: Category;
-    price: number|null;
-    selected?: boolean; 
+    price: number | null;
+    selected: boolean;
 }
-//Интерфейс данных пользователя
-export interface IUser {
-    adress: string;
-    email: string;
-    telephone: string;
-    paymentWay: string
+// карточка товара
+export interface ICardOfProduct extends IProduct {
+    selected: boolean; 
+    index?: number;
 }
 
 //Интерфейс данных приложения
-export interface IAppData {
-    catalog: ICard[]; 
-    basket: ICard[]; 
-    order: IUser | null; 
+export interface IAppState {
+    cardList: IProduct[]; 
+    basket: IProduct[]; 
+    order: IOrder | null; 
 }
 
 //интерфейс окна формы
 export interface IForm {
-    valid: boolean; 
     errors: string[]; 
+    valid: boolean; 
 }
 
-//интерфейс модального окна оформления заказа
-export interface IOrderForm {
+//интерфейс модального окна заказа
+export interface IDeliveryForm {
     address: string; 
     payment: string; 
 }
 
-//интерфейс 2 шага оформления заказа
+//Интерфейс заполнения контактной информации
 export interface IContactForm {
     email: string; 
     phone: string; 
 }
 
-export interface IOrder extends IOrderForm, IContactForm {
-    items: string[]; //список id товаров
-    total: number; //общая сумма заказа
+//Интерфейс заказа
+export interface IOrder extends IDeliveryForm, IContactForm {
+    items: string[];
+    total: number; 
 }
+
+//интерфейс валидации формы
+export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 //интерфейс корзины
 export interface IBasket {
-    items: HTMLElement[]; //список товаров
-    price: number; //итоговая стоимость заказа
+    basketList: HTMLElement[]; 
+    totalCost: number; 
 }
 
 //интерфейс успешное оформление заказа
 export interface IOrderSuccess {
     id: string; 
     count: number; //списано синапсов
+}
+
+//интерфейс действий над карточкой
+export interface ICardOperation {
+    Click: (event: MouseEvent) => void; 
+}
+
+//интерфейс действий окна успешного оформления заказа
+export interface ISuccessOperation {
+    Click: () => void; //по клику
+}
+
+//интерфейс главной страницы
+export interface IPage {
+    productList: HTMLElement[]; 
+}
+
+// интерфейс данных ответа сервера на создание заказа
+export interface IOrderResult {
+	total: number; 
 }

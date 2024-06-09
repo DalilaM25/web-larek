@@ -47,45 +47,50 @@ yarn build
 Тип для описания категории товара
 
 ```
-export type Category =  'софт-скил' | 'другое' | 'дополнительное' | 'кнопка' | 'хард-скил';
+export type CategoryColorsList =  'софт-скил' | 'хард-скил' | 'дополнительное' | 'другое' | 'кнопка';
 ```
-Интерфейс карточки товара
+товар
 ```
-interface ICard {
+export interface IProduct {
+    title: string;
     id: string;
+    category: CategoryColorsList;
     description: string;
     image: string;
-    title: string;
-    category: Category;
-    price: number|null;
-    selected?: boolean; 
+    price: number | null;
+    selected: boolean;
 }
 ```
-Интерфейс данных пользователя
+карточка товара
 ```
-interface IUser {
-    adress: string;
-    email: string;
-    telephone: string;
-    paymentWay: string
+export interface ICardOfProduct extends IProduct {
+    selected: boolean; 
+    index?: number;
 }
 ```
 Интерфейс данных приложения
 ```
-interface IAppData {
-    catalog: ICard[]; 
-    basket: ICard[]; 
-    order: IOrder | null; 
+interface IAppState {
+    cardList: IProduct[]; 
+    basket: IProduct[]; 
+    order: IOrder | null;
 }
 ```
-Интерфейс модального окна оформления заказа
+Интерфейс окна формы
 ```
-interface IOrderForm {
+interface IForm {
+    errors: string[]; 
+    valid: boolean; 
+}
+```
+Интерфейс модального окна заказа
+```
+interface IDeliveryForm {
     address: string; 
     payment: string; 
 }
 ```
-Интерфейс 2 шага оформления заказа
+Интерфейс заполнения контактной информации
 ```
 interface IContactForm {
     email: string; 
@@ -94,16 +99,21 @@ interface IContactForm {
 ```
 Интерфейс заказа
 ```
-interface IOrder extends IOrderForm, IContactForm {
+interface IOrder extends IDeliveryForm, IContactForm {
     items: string[]; 
     total: number; 
 }
 ```
+
+Интерфейс валидации формы
+```
+type FormErrors = Partial<Record<keyof IOrder, string>>;
+```
 Интерфейс корзины
 ```
 interface IBasket {
-    items: HTMLElement[]; 
-    price: number; 
+    basketList: HTMLElement[]; 
+    totalCost: number; 
 }
 ```
 Интерфейс успешное оформление заказа
@@ -113,13 +123,39 @@ interface IOrderSuccess {
     count: number; 
 }
 ```
+Интерфейс действий над карточкой
+```
+interface ICardOperation {
+    Click: (event: MouseEvent) => void; 
+}
+```
+
+Интерфейс действий окна успешного оформления заказа
+```
+interface ISuccessOperation {
+    Click: () => void; 
+}
+```
+интерфейс главной страницы
+```
+interface IPage {
+    productList: HTMLElement[]; //список товаров
+}
+```
+Интерфейс данных ответа сервера на создание заказа
+```
+interface IOrderResult {
+	total: number; 
+}
+```
+
 
 ## Архитектура приложения
 
 Код приложения разделен на слои согласно парадигме MVP: 
 - слой данных, отвечает за хранение и изменение данных;
 - слой представления, отвечает за отображение данных на странице;
-- презентер, отвечает за связь представления и данных.
+- презентер, отвечает за связь представления и данных (index.ts).
 
 ### Базовый код
 
@@ -137,7 +173,7 @@ interface IOrderSuccess {
 - `trigger` - возвращает функцию, при вызове которой инициализируется требуемое в параметрах событие   
 
 #### Класс Component
-Основа для наследования другими классами приложения. Реализует инструментарий для работы с DOM в дочерних компонентах.
+Основа для наследования  классами реализующими слой представления. Реализует инструментарий для работы с DOM в дочерних компонентах.
 Конструктор принимает элемент разметки, в который будет вставлен компонент. Имеет следующие методы:
 - `toggleClass(element: HTMLElement, className: string, force?: boolean)` — переключает класс у элемента
 - `setText(element: HTMLElement, value: unknown)` — устанавливает текстовое содержимое элемента, проверяя наличие переданного элемента
@@ -149,29 +185,37 @@ interface IOrderSuccess {
 
 #### Класс Model 
 Класс для слоя данных. Связывает данные и события о которых нужно уведомлять подписчиков.
-Конструктор принимает данные `data: T` и события `events: IEvents`. Есть метод `сhangeEmitter` - вызывает метод emit базового класса Events и сообщает об изменении данных.
+Конструктор принимает данные `data: Partial<T>` и события `events: IEvents`. Есть метод `сhangeEmitter` - вызывает метод emit базового класса Events и сообщает об изменении данных.
 
-### Слой данных
+### Слой данных (реализация слоя Model)
 
-#### Класс AppData
+#### Класс AppState
 Класс для хранения данных и работы с данными. Позволяет получать, хранить, удалять данные, а так же осуществлять другие необходимые действия, которые станут необходимы в ходе реализации приложения. Наследует класс Model.
 
 Свойства:
-- `сatalog: ICard[]` - массив карточек товаров
-- `basket: ICard[]` - массив карточек в корзине
+- `cardList: IProduct[]` - массив товаров
+- `basket: IProduct[]` - массив товаров в корзине
 - `order: IOrder` - заказ для отправки на сервер
 
 Методы:
 
-  - `setCatalog(items: ICard[]): void` - добавляет карточки товаров в массив
-  - `addProduct(item: ICard): void`- добавляет товар в корзину
-   - `removeProduct(id: string): void`- удаляет товар из корзины
-  -  `resetBasket(): void` - очищает всю корзину
-  - `countBasket(): void` - считает число товаров в корзине
-   - `priceBasket(): void` - считает общую стоимость товаров в корзине
-  -  `setOrder(): void`- сохраняет данные заказа
+  - `createCardList(cards: IProduct[]): void` - добавляет карточки товаров в массив
+  - `addBasket(product: IProduct): void`- добавляет товар в корзину
+   - `remBasket(product: IProduct): void`- удаляет товар из корзины
+  -  `clearBasket(): void` - очищает всю корзину
+   - `totalPrice(): void` - считает общую стоимость товаров в корзине
+  -  `addOrder(product: IProduct)`- сохраняет данные заказа
+  -  `remOrder(product: IProduct)`- удаляет данные заказа
+  -  `get isBasketEmpty()`- проверяет пустоту корзины
 
-### Слой представления
+#### Класс AppAPI
+Класс для взаимодействия с сервером, наследуется от класса Api (реализация слоя Model). Методы класса используются для получения данных с сервера и предоставления данных в Presenter для отображения в компонентах (View)
+Методы:
+- `getList(): Promise<ICardOfProduct[]>` - получить список товаров
+- `makeOrder(value: IOrder): Promise<IOrderResult>` - отправляет заказ
+
+
+### Слой представления (реализация слоя View)
 
 #### Класс Page
 
@@ -183,8 +227,10 @@ interface IOrderSuccess {
 
 Метод:
 - `set catalog(items: HTMLElement[])` — добавляет каталог товаров на главной странице
-
-#### Класс Card
+- `set counter(value: number)` - устанавливает счетчик товаров на корзину
+- `set locked(value: boolean)` - устанавливает блокировку прокрутки
+ 
+#### Класс CardOfProduct
 
 Используется для управления отображением данных в карточке товара. Наследует класс Component.
 
@@ -192,16 +238,19 @@ interface IOrderSuccess {
 - `container: HTMLElement` — контейнер для вставки карточки
 
 Свойства:
-- `_title: HTMLElement` — наименование товара
-- `_image: HTMLImageElement` — изображение товара
-- `_price: HTMLElement` — цена товара
 - `_category: HTMLElement` — категория товара
-
+- `_title: HTMLElement` — наименование товара
+- `_text: HTMLElement | null;` - описание товара
+- `_image: HTMLImageElement` — изображение товара
+- `_price: HTMLElement | null` — цена товара
+- `_button: HTMLButtonElement | null` - кнопка
 Методы:
+- `set price(price: number | null)` — установить цену
+- `set category(text: CategoryColorsList)` — установить категорию 
+- `set image(link: string)` — установить изображение
 - `set title(value: string)` — установить название 
-- `set image(value: string)` — установить изображение
-- `set price(value: number)` — установить цену
-- `set category(value: string)` — установить категорию 
+- `set description(text: string)` - установка описания в карточку
+- `set selected(value: boolean) ` - установить выбран ли товар
 
 #### Класс Basket
 
@@ -212,47 +261,47 @@ interface IOrderSuccess {
 - `events: EventEmitter` — объект событий
 
 Свойства:
-- `productList: HTMLElement[]` — массив элементов в корзине
-- `price: HTMLElement` — элемент с финальной ценой
-- `button: HTMLButtonElement` — элемент кнопки
+- `basketList: HTMLElement` — список товаров в корзине
+- `numeration: HTMLElement` — элемент нумерации списка
+- `totalCost: HTMLElement | null` — элемент с финальной ценой
+- `basketButton: HTMLButtonElement | null;` — элемент кнопки
 
 Методы:
-- `set productList(items: HTMLElement[])` — установить список элементов корзины
-- `set price(price: number)` — установить общую стоимость в разметку
+- `set products(products: HTMLElement[])` — установить список товаров 
+- `set cost(cost: number)` — установить общую стоимость
+- `set selected(items: string[])` — блок кнопки в пустой корзине
 
 #### Класс Form 
 
 Класс для работы с формами. Предоставляет функционал для проверки форм, валидации, рендера результата.
 
 Свойства:
-- `_submit: HTMLButtonElement` — кнопка далее
-- `_errors: HTMLElement` — элемент для отображения ошибки
+- `submitButton: HTMLButtonElement` — кнопка отправки формы
+- `formErrors: HTMLElement` — элемент для отображения ошибки
 
 Методы:
 - `set valid(value: boolean): void` - установка значения валидности
+- `set valid(value: boolean): void` - делает кнопку неактивной при наличии ошибки в поле
 - `set errors(value: string): void` - передача ошибок в форме
-- `render(): void` - отрисовка формы
+- `render(data: Partial<T> & IForm): void` - отрисовка формы
 
-#### Класс OrderForm 
+#### Класс DeliveryForm 
 
 Класс для работы с формой заказа товара. Расширяет класс Form.
 
 Свойства класса:
-- `_buttons: HTMLButtonElement[]` — кнопки выбора оплаты
+- `formButtons: HTMLButtonElement[];` — кнопки формы
 
 Методы:
-- `set payment(name: string)` — устанавливает выбранный способ оплаты
-- `set address(value: string)` — устанавливает адрес доставки
+- `set address(text: string)` — устанавливает адрес доставки
+- `set payment(value: string) ` — устанавливает способ оплаты
 
 #### Класс ContactForm 
 
 Класс для работы с формой заказа товара (2 этап - заполнения контактных данных). Расширяет класс Form.
 
-Свойства:
-- `nextButton: HTMLButtonElement` — кнопка закрытия модального окна при успешном заказа
-
 Методы:
-- `set email(value: string): void` — устанавливает email
+- `set email(text: string): void` — устанавливает email
 - `set phone(value: string): void` — устанавливает телефон
 
 #### Класс OrderSuccess
@@ -264,11 +313,11 @@ interface IOrderSuccess {
 - `events: IEvents`
 
 Свойства:
-- `close: HTMLElement` — кнопка закрытия окна
-- `synapse: HTMLElement` — общее число синапсов
+- `closeButton: HTMLButtonElement` — кнопка закрытия окна
+- `totalSpent: HTMLElement` — общее число синапсов
 
 Методы:
-- `set synapse(synapse: number)` — устанавливает списанное число синапсов
+- `set count(total: number | string)` — устанавливает списанное число синапсов
 
 #### Класс Modal 
 
@@ -279,9 +328,11 @@ interface IOrderSuccess {
 - `events: IEvents` — объект событий
 
 Свойства:
-- `_submit: HTMLButtonElement` — кнопка далее
+- `button: HTMLButtonElement` 
+- `сontent: HTMLElement`
 
 Методы:
-- `set content(value: HTMLElement): void` - устанавливает значения в модальном окне
+- `set content(content: HTMLElement): void` - устанавливает содержимое в модальном окне
+- `render(content: IModal): HTMLElement ` - отрисовывает модальное окно
 - `open(): void` - открыть модальное окно
 - `close(): void` - закрыть модальное окно
