@@ -1,7 +1,3 @@
-export function pascalToKebab(value: string): string {
-    return value.replace(/([a-z0–9])([A-Z])/g, "$1-$2").toLowerCase();
-}
-
 export function isSelector(x: any): x is string {
     return (typeof x === "string") && x.length > 1;
 }
@@ -132,8 +128,4 @@ export function createElement<
         }
     }
     return element;
-}
-
-export function formatNumber(x: number, sep = ' ') {
-	return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, sep);
 }

@@ -11,7 +11,6 @@ export class DeliveryForm extends Form<IDeliveryForm> {
 		this.formButtons = ensureAllElements<HTMLButtonElement>('.button_alt', container);
 		this.formButtons.forEach((button) => {
 			button.addEventListener('click', () => {
-				this.payment = button.name;
 				events.emit('payment:change', button);
 			});
 		});

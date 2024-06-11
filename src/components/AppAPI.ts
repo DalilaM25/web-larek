@@ -1,7 +1,8 @@
-import {IOrder, IOrderResult, ICardOfProduct} from '../types';
+import {IOrder, IOrderResult, IProduct} from '../types';
 import {Api, ApiListResponse} from './base/api';
 export interface IAppAPI {
-    getList: () => Promise<ICardOfProduct[]>;
+    getList: () => Promise<IProduct[]>;
+    makeOrder(value: IOrder): Promise<IOrderResult>;
 }
 export class AppAPI extends Api implements IAppAPI {
     constructor(readonly cdn: string, baseUrl: string, options?: RequestInit) {
@@ -9,8 +10,8 @@ export class AppAPI extends Api implements IAppAPI {
         this.cdn = cdn;
     }
 
-    getList(): Promise<ICardOfProduct[]> {
-        return this.get('/product').then((data: ApiListResponse<ICardOfProduct>) =>
+    getList(): Promise<IProduct[]> {
+        return this.get('/product').then((data: ApiListResponse<IProduct>) =>
             data.items.map((item) => ({
                 ...item,
                 image: this.cdn + item.image,

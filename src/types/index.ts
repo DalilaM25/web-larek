@@ -1,19 +1,14 @@
-export type CategoryColorsList =  'софт-скил' | 'хард-скил' | 'дополнительное' | 'другое' | 'кнопка' ;
+export type Category =  'софт-скил' | 'хард-скил' | 'дополнительное' | 'другое' | 'кнопка' ;
 
 //товар
 export interface IProduct {
     title: string;
     id: string;
-    category: CategoryColorsList;
+    category: Category;
     description: string;
     image: string;
     price: number | null;
-    selected: boolean;
-}
-// карточка товара
-export interface ICardOfProduct extends IProduct {
-    selected: boolean; 
-    index?: number;
+    buttonName?: string;
 }
 
 //Интерфейс данных приложения
@@ -53,7 +48,8 @@ export type FormErrors = Partial<Record<keyof IOrder, string>>;
 //интерфейс корзины
 export interface IBasket {
     basketList: HTMLElement[]; 
-    totalCost: number; 
+    cost: number; 
+    selected: string[];
 }
 
 //интерфейс успешное оформление заказа
@@ -63,7 +59,7 @@ export interface IOrderSuccess {
 }
 
 //интерфейс действий над карточкой
-export interface ICardOperation {
+export interface IOperation {
     Click: (event: MouseEvent) => void; 
 }
 
