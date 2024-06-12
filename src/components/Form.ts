@@ -3,7 +3,7 @@ import {IEvents} from "./base/events";
 import {IForm} from "../types";
 import {ensureElement} from "../utils/utils";
 
-export class Form<T> extends Component<IForm> {
+export class Form<T> extends Component<IForm<T>> {
     protected submitButton: HTMLButtonElement;
     protected formErrors: HTMLElement;
 
@@ -35,7 +35,7 @@ export class Form<T> extends Component<IForm> {
         this.events.emit(`order:change`, {field,value});
     }
 
-    render(data: Partial<T> & IForm) {
+    render(data: Partial<T> & IForm<T>) {
         const {  errors, valid, ...inputs } = data;
         super.render({ errors, valid });
         Object.assign(this, inputs);

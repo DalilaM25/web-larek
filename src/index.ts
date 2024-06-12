@@ -176,8 +176,9 @@ events.on('formErrors:change', (errors: Partial<IOrder>) => {
 });
 
 // Выбор способа оплаты
-events.on('payment:change', (item: HTMLButtonElement) => {
-	appState.order.payment = item.name;
+events.on('payment:change', (data: { payment: string; button: HTMLElement }) => {
+	appState.setPayment(data.payment);
+	delivery.addPayment(data.button);
 	appState.validateOrder();
 });
 

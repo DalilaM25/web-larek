@@ -1,6 +1,6 @@
 import {Component} from './base/Component';
 import {ensureElement} from "../utils/utils";
-import {Category, IProduct, IOperation} from "../types";
+import {Category, ICardOfProduct, IOperation} from "../types";
 
 const CategoryColorsList: Map<string, string> = new Map([
 	['хард-скил', 'card__category_hard'],
@@ -10,7 +10,7 @@ const CategoryColorsList: Map<string, string> = new Map([
 	['кнопка', 'card__category_button'],
   ]);
 
-export class CardOfProduct extends Component<IProduct> {
+export class CardOfProduct extends Component<ICardOfProduct> {
     protected _category: HTMLElement | null;
     protected _title: HTMLElement;
     protected _text: HTMLElement | null;
@@ -35,7 +35,6 @@ export class CardOfProduct extends Component<IProduct> {
 			}
         }
     }
-
 
     set price(price: number | null) {
         if (price) {

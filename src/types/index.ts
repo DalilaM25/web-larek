@@ -3,12 +3,28 @@ export type Category =  'софт-скил' | 'хард-скил' | 'допол�
 //товар
 export interface IProduct {
     title: string;
-    id: string;
+    id?: string;
     category: Category;
-    description: string;
+    description?: string;
     image: string;
     price: number | null;
     buttonName?: string;
+}
+
+//Карточка товара
+export interface ICardOfProduct extends IProduct{
+    _category: HTMLElement;
+    _title: HTMLElement;
+    _text: HTMLElement | null;
+    _image: HTMLImageElement;
+    _price: HTMLElement | null;
+    _button: HTMLButtonElement | null;
+    set price(price: number | null);
+    set category(text: Category);
+    set image(link: string);
+    set title(text: string);
+    set description(text: string);
+    set buttonName(value: string);
 }
 
 //Интерфейс данных приложения
@@ -16,18 +32,41 @@ export interface IAppState {
     cardList: IProduct[]; 
     basket: IProduct[]; 
     order: IOrder | null; 
+    preview: string | null;
+    formErrors: FormErrors;
+    isBasketEmpty(): boolean;
+    createCardList(cards: IProduct[]) : void;
+    totalPrice(): number;
+    addBasket(product: IProduct): void;
+    remBasket(product: IProduct): void;
+    addOrder(): void;
+    clearBasket(): void;
+    getItemsInBasket(): IProduct[];
+    getBasketProductIndex(product: IProduct): number;
+    setButtonText(product: IProduct):string;
+    setPayment(value: string):void;
+    setAddress(value: string):void;
+	setPreview(product: IProduct) :void;
+    setOrderField(field: keyof Pick<IOrder, 'address' | 'phone' | 'email'>,value: string):void;
+    validateOrder():void;
 }
 
 //интерфейс окна формы
-export interface IForm {
+export interface IForm<T> {
     errors: string[]; 
-    valid: boolean; 
+    valid: boolean;
+    render?(data: Partial<T> & IForm<T>):void;
+    inputChange?(field: keyof T, value: string):void;
 }
 
 //интерфейс модального окна заказа
 export interface IDeliveryForm {
+    onlinePayment?: HTMLButtonElement;
+	cashPayment?: HTMLButtonElement;
     address: string; 
     payment: string; 
+    addPayment?(value: HTMLElement):void;
+    remPayment?():void;
 }
 
 //Интерфейс заполнения контактной информации
@@ -47,15 +86,18 @@ export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 //интерфейс корзины
 export interface IBasket {
-    basketList: HTMLElement[]; 
-    cost: number; 
-    selected: string[];
+    basketList: HTMLElement; 
+    totalCost: number; 
+    basketButton: HTMLButtonElement;
+    products: HTMLElement[];
+    cost: number;
 }
 
 //интерфейс успешное оформление заказа
 export interface IOrderSuccess {
-    id: string; 
-    count: number; //списано синапсов
+    closeButton: HTMLButtonElement;
+    totalSpent: HTMLElement;
+    count: number; 
 }
 
 //интерфейс действий над карточкой
@@ -65,15 +107,30 @@ export interface IOperation {
 
 //интерфейс действий окна успешного оформления заказа
 export interface ISuccessOperation {
-    Click: () => void; //по клику
+    Click: () => void;
 }
 
 //интерфейс главной страницы
 export interface IPage {
-    productList: HTMLElement[]; 
+    _wrapper: HTMLElement;
+    _basket: HTMLElement;
+    _counter: HTMLElement;
+    _catalog: HTMLElement;
+    catalog: HTMLElement[];
+    counter: number;
+    locked: boolean;
 }
 
 // интерфейс данных ответа сервера на создание заказа
 export interface IOrderResult {
-	total: number; 
+	id: string;
+	total: number;
+}
+// Модальное окно
+export interface IModal {
+	content: HTMLElement;
+    button?: HTMLButtonElement;
+    render?(content: IModal): HTMLElement;
+    open?():void;
+    close?():void;
 }
