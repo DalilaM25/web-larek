@@ -3,7 +3,7 @@ import {IEvents} from './base/events';
 import {ensureElement} from "../utils/utils";
 import {Component} from './base/Component';
 
-export class Page extends Component<IPage> {
+export class Page extends Component<IPage> implements IPage {
     protected _wrapper: HTMLElement;
     protected _basket: HTMLElement;
     protected _counter: HTMLElement;

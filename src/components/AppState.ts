@@ -2,22 +2,18 @@ import { IAppState, IProduct, IOrder, FormErrors } from "../types";
 import {Model} from './base/Model';
 
 
-export class AppState extends Model<IAppState> {
+export class AppState extends Model<IAppState> implements IAppState{
     cardList: IProduct[];
     formErrors: FormErrors = {};
     basket: IProduct[] = [];
 	preview: string | null;
     order: IOrder = {
-        total: 0,
-        items: [],
         payment: '',
         address: '',
         phone: '',
         email: '',
     };
     
-
-
     createCardList(cards: IProduct[]) {
         this.cardList = cards;
         this.emitChanges('cards:create');
@@ -46,11 +42,12 @@ export class AppState extends Model<IAppState> {
 		return;
 	}
     
-	addOrder() {
-        this.basket.forEach(
-			(card) => (this.order.items = [...this.order.items, card.id])
-		);
-		this.order.total = this.totalPrice();
+	getOrder() {
+		return {
+			...this.order,
+			total: this.totalPrice(),
+			items: this.basket.map(el => el.id),
+		}
     }
 
     clearBasket() {
@@ -59,14 +56,12 @@ export class AppState extends Model<IAppState> {
 			phone: '',
 			payment: '',
 			address: '',
-			total: 0,
-			items: [],
 		};
         this.basket = [];
         this.emitChanges('basket:changed');
     }
 
-    get isBasketEmpty(): boolean {
+    isBasketEmpty(): boolean {
 		return this.basket.length === 0;
 	}
 
@@ -76,12 +71,6 @@ export class AppState extends Model<IAppState> {
 
 	getBasketProductIndex(product: IProduct): number {
 		return this.basket.indexOf(product) + 1;
-	}
-
-	setButtonText(product: IProduct) {
-		if (this.basket.some((card) => card.id === product.id)) {
-			return 'Уже в корзине';
-		} else return 'В корзину';
 	}
 
 	setPayment(value: string) {

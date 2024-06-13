@@ -85,7 +85,9 @@ events.on('preview:changed', (product: IProduct) => {
 			image: product.image,
 			price: product.price,
 			id: product.id,
-			buttonName: appState.setButtonText(product),
+			buttonName: appState.basket.map((el) => el.id).includes(product.id)
+				? 'Уже в корзине'
+				: 'В корзину',
 		}),
 	});
 });
@@ -133,7 +135,7 @@ events.on('order:open', () => {
 		content: delivery.render({
 			address: '',
 			payment: '',
-			errors: [],
+			errors: '',
 			valid: false,
 		}),
 	});
@@ -141,13 +143,13 @@ events.on('order:open', () => {
 
 // Модальное окно заполнения контактной информации
 events.on('order:submit', () => {
-	appState.order.total = appState.totalPrice();
+	appState.getOrder().total = appState.totalPrice();
 	modal.render({
 		content: contacts.render({
 			email: '',
 			phone: '',
 			valid: false,
-			errors: [],
+			errors: '',
 		}),
 	});
 });
@@ -176,11 +178,14 @@ events.on('formErrors:change', (errors: Partial<IOrder>) => {
 });
 
 // Выбор способа оплаты
-events.on('payment:change', (data: { payment: string; button: HTMLElement }) => {
-	appState.setPayment(data.payment);
-	delivery.addPayment(data.button);
-	appState.validateOrder();
-});
+events.on(
+	'payment:change',
+	(data: { payment: string; button: HTMLElement }) => {
+		appState.setPayment(data.payment);
+		delivery.addPayment(data.button);
+		appState.validateOrder();
+	}
+);
 
 // Изменение поля доставки
 events.on(
@@ -206,9 +211,8 @@ events.on(
 
 //Отправляем форму контактов и открываем окно с успешным заказом
 events.on('contacts:submit', () => {
-	appState.addOrder();
 	api
-		.makeOrder(appState.order)
+		.makeOrder(appState.getOrder())
 		.then((res) => {
 			success.count = res.total; // Обновляем контент в существующем инстансе
 			modal.render({ content: success.render() });

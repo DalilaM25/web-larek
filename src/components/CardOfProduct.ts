@@ -1,6 +1,6 @@
 import {Component} from './base/Component';
 import {ensureElement} from "../utils/utils";
-import {Category, ICardOfProduct, IOperation} from "../types";
+import {Category, ICardOfProduct, IOperation, IProduct} from "../types";
 
 const CategoryColorsList: Map<string, string> = new Map([
 	['хард-скил', 'card__category_hard'],
@@ -10,7 +10,8 @@ const CategoryColorsList: Map<string, string> = new Map([
 	['кнопка', 'card__category_button'],
   ]);
 
-export class CardOfProduct extends Component<ICardOfProduct> {
+
+export class CardOfProduct extends Component<IProduct> implements ICardOfProduct {
     protected _category: HTMLElement | null;
     protected _title: HTMLElement;
     protected _text: HTMLElement | null;
@@ -48,6 +49,7 @@ export class CardOfProduct extends Component<ICardOfProduct> {
         this.setText(this._category, text);
         this.toggleClass(this._category, CategoryColorsList.get(text), true);
     }
+
     set image(link: string) {
         this.setImage(this._image, link, this.title);
         }
