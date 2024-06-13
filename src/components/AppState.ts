@@ -1,31 +1,37 @@
-import { IAppState, IProduct, IOrder, FormErrors } from "../types";
-import {Model} from './base/Model';
+import { IAppState, IProduct, IOrder, FormErrors } from '../types';
+import { IEvents } from './base/events';
 
-
-export class AppState extends Model<IAppState> implements IAppState{
-    cardList: IProduct[];
-    formErrors: FormErrors = {};
-    basket: IProduct[] = [];
+export class AppState implements IAppState {
+	cardList: IProduct[];
+	formErrors: FormErrors = {};
+	basket: IProduct[] = [];
 	preview: string | null;
-    order: IOrder = {
-        payment: '',
-        address: '',
-        phone: '',
-        email: '',
-    };
-    
-    createCardList(cards: IProduct[]) {
-        this.cardList = cards;
-        this.emitChanges('cards:create');
+	order: IOrder = {
+		payment: '',
+		address: '',
+		phone: '',
+		email: '',
+	};
+
+	constructor(protected events: IEvents) {
+	}
+
+	emitChanges(event: string, payload?: object) {
+        this.events.emit(event, payload ?? {});
     }
 
-    totalPrice() {
-        let totalPrice = 0;
+	createCardList(cards: IProduct[]) {
+		this.cardList = cards;
+		this.emitChanges('cards:create');
+	}
+
+	totalPrice() {
+		let totalPrice = 0;
 		this.basket.forEach((card) => (totalPrice += card.price));
 		return totalPrice;
-    }
+	}
 
-    addBasket(product: IProduct) {
+	addBasket(product: IProduct) {
 		if (!this.basket.some((card) => card.id === product.id)) {
 			this.basket = [...this.basket, product];
 			this.emitChanges('basket:changed');
@@ -34,34 +40,34 @@ export class AppState extends Model<IAppState> implements IAppState{
 		}
 	}
 
-    remBasket(product: IProduct) {
+	remBasket(product: IProduct) {
 		if (this.basket.some((card) => card.id === product.id)) {
 			this.basket = this.basket.filter((card) => product.id !== card.id);
 			this.emitChanges('basket:changed');
 		}
 		return;
 	}
-    
+
 	getOrder() {
 		return {
 			...this.order,
 			total: this.totalPrice(),
-			items: this.basket.map(el => el.id),
-		}
-    }
+			items: this.basket.map((el) => el.id),
+		};
+	}
 
-    clearBasket() {
+	clearBasket() {
 		this.order = {
 			email: '',
 			phone: '',
 			payment: '',
 			address: '',
 		};
-        this.basket = [];
-        this.emitChanges('basket:changed');
-    }
+		this.basket = [];
+		this.emitChanges('basket:changed');
+	}
 
-    isBasketEmpty(): boolean {
+	isBasketEmpty(): boolean {
 		return this.basket.length === 0;
 	}
 
@@ -85,14 +91,14 @@ export class AppState extends Model<IAppState> implements IAppState{
 		this.emitChanges('preview:changed', product);
 	}
 
-    setOrderField(
+	setOrderField(
 		field: keyof Pick<IOrder, 'address' | 'phone' | 'email'>,
 		value: string
 	) {
 		this.order[field] = value;
 		this.validateOrder();
 	}
- 
+
 	validateOrder() {
 		const errors: typeof this.formErrors = {};
 		if (!this.order.email) {
@@ -115,5 +121,4 @@ export class AppState extends Model<IAppState> implements IAppState{
 		this.events.emit('formErrors:change', this.formErrors);
 		return Object.keys(errors).length === 0;
 	}
-
 }

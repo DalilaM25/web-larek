@@ -2,7 +2,17 @@ import { Form } from './Form';
 import { IEvents } from './base/events';
 import { IDeliveryForm } from '../types';
 
-export class DeliveryForm extends Form<IDeliveryForm> implements IDeliveryForm {
+interface DeliveryRender {
+	address: string;
+	payment: string;
+	errors: string;
+	valid: boolean;
+}
+
+export class DeliveryForm
+	extends Form<DeliveryRender>
+	implements IDeliveryForm
+{
 	protected _onlinePayment: HTMLButtonElement;
 	protected _cashPayment: HTMLButtonElement;
 	payment = '';
@@ -35,14 +45,14 @@ export class DeliveryForm extends Form<IDeliveryForm> implements IDeliveryForm {
 		}
 	}
 
-	get onlinePayment(){
-		return this._onlinePayment
+	get onlinePayment() {
+		return this._onlinePayment;
 	}
 
-	get cashPayment(){
-		return this._cashPayment
+	get cashPayment() {
+		return this._cashPayment;
 	}
-	
+
 	set address(text: string) {
 		(this.container.elements.namedItem('address') as HTMLInputElement).value =
 			text;

@@ -3,7 +3,12 @@ import {IEvents} from "./base/events";
 import {IForm} from "../types";
 import {ensureElement} from "../utils/utils";
 
-export class Form<T> extends Component<any> implements IForm<T> {
+interface FormRender {
+    errors: string;
+	valid: boolean;
+}
+
+export class Form<T> extends Component<FormRender> implements IForm<T> {
     protected submitButton: HTMLButtonElement;
     protected formErrors: HTMLElement;
 

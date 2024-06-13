@@ -9,7 +9,7 @@ export interface IBasketView {
     basketButton: HTMLButtonElement;
 }
 
-export class Basket extends Component<IBasketView> implements IBasket{
+export class Basket extends Component<never> implements IBasket{
     protected basketList: HTMLElement;
     protected totalCost: HTMLElement;
     protected basketButton: HTMLButtonElement;

@@ -81,8 +81,7 @@ export interface IOrder
 			IDeliveryForm,
 			'addPayment' | 'remPayment' | 'onlinePayment' | 'cashPayment'
 		>,
-		IContactForm {
-}
+		IContactForm {}
 
 //интерфейс валидации формы
 export type FormErrors = Partial<Record<keyof IOrder, string>>;
@@ -125,8 +124,9 @@ export interface IOrderResult {
 // Модальное окно
 export interface IModal {
 	content: HTMLElement;
-	button?: HTMLButtonElement;
-	render?(content: IModal): HTMLElement;
-	open?(): void;
-	close?(): void;
+	render(content: IModal): HTMLElement;
+	open(): void;
+	close(): void;
 }
+
+export type ModalRender = Pick<IModal, 'content'>;

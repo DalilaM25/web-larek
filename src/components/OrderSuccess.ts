@@ -1,8 +1,8 @@
 import {Component} from './base/Component';
 import {ensureElement} from "../utils/utils";
-import {IOrderSuccess, ISuccessOperation} from "../types";
+import { ISuccessOperation} from "../types";
 
-export class OrderSuccess extends Component<IOrderSuccess> {
+export class OrderSuccess extends Component<never> {
     protected closeButton: HTMLButtonElement;
     protected totalSpent: HTMLElement;
 
