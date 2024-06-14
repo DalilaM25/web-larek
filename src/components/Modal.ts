@@ -1,7 +1,7 @@
 import { ensureElement } from '../utils/utils';
 import { IEvents } from './base/events';
 import { Component } from './base/Component';
-import { IModal, ModalRender } from '../types';
+import { IModal, ModalRender} from '../types';
 
 export class Modal extends Component<ModalRender> implements IModal {
 	protected button: HTMLButtonElement;

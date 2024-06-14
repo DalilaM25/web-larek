@@ -13,16 +13,16 @@ export class DeliveryForm
 	extends Form<DeliveryRender>
 	implements IDeliveryForm
 {
-	protected _onlinePayment: HTMLButtonElement;
-	protected _cashPayment: HTMLButtonElement;
-	payment = '';
+	protected onlinePayment: HTMLButtonElement;
+	protected cashPayment: HTMLButtonElement;
+	payment: string;
 
 	constructor(container: HTMLFormElement, events: IEvents) {
 		super(container, events);
-		this._onlinePayment = this.container.elements.namedItem(
+		this.onlinePayment = this.container.elements.namedItem(
 			'card'
 		) as HTMLButtonElement;
-		this._cashPayment = this.container.elements.namedItem(
+		this.cashPayment = this.container.elements.namedItem(
 			'cash'
 		) as HTMLButtonElement;
 
@@ -35,22 +35,14 @@ export class DeliveryForm
 			});
 		}
 
-		if (this._cashPayment) {
-			this._cashPayment.addEventListener('click', () => {
+		if (this.cashPayment) {
+			this.cashPayment.addEventListener('click', () => {
 				events.emit(`payment:change`, {
-					payment: this._cashPayment.name,
-					button: this._cashPayment,
+					payment: this.cashPayment.name,
+					button: this.cashPayment,
 				});
 			});
 		}
-	}
-
-	get onlinePayment() {
-		return this._onlinePayment;
-	}
-
-	get cashPayment() {
-		return this._cashPayment;
 	}
 
 	set address(text: string) {
@@ -64,7 +56,7 @@ export class DeliveryForm
 	}
 
 	remPayment() {
-		this.toggleClass(this._onlinePayment, 'button_alt-active', false);
-		this.toggleClass(this._cashPayment, 'button_alt-active', false);
+		this.toggleClass(this.onlinePayment, 'button_alt-active', false);
+		this.toggleClass(this.cashPayment, 'button_alt-active', false);
 	}
 }

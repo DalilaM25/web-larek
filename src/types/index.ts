@@ -30,9 +30,6 @@ export interface ICardOfProduct {
 export interface IAppState {
 	cardList: IProduct[];
 	basket: IProduct[];
-	order: IOrder | null;
-	preview: string | null;
-	formErrors: FormErrors;
 	isBasketEmpty(): boolean;
 	createCardList(cards: IProduct[]): void;
 	totalPrice(): number;
@@ -61,10 +58,8 @@ export interface IForm<T> {
 
 //интерфейс модального окна заказа
 export interface IDeliveryForm {
-	get onlinePayment(): HTMLButtonElement;
-	get cashPayment(): HTMLButtonElement;
-	set address(value: string);
 	payment: string;
+	set address(value: string);
 	addPayment(value: HTMLElement): void;
 	remPayment(): void;
 }
@@ -88,15 +83,13 @@ export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 //интерфейс корзины
 export interface IBasket {
-	products: HTMLElement[];
-	cost: number;
+	set products(products: HTMLElement[]);
+	set cost(cost: number);
 }
 
 //интерфейс успешное оформление заказа
 export interface IOrderSuccess {
-	closeButton: HTMLButtonElement;
-	totalSpent: HTMLElement;
-	count: number;
+	set count(total: number | string);
 }
 
 //интерфейс действий над карточкой
@@ -111,9 +104,9 @@ export interface ISuccessOperation {
 
 //интерфейс главной страницы
 export interface IPage {
-	catalog: HTMLElement[];
-	counter: number;
-	locked: boolean;
+	set catalog(items: HTMLElement[]);
+	set counter(value: number);
+	set locked(value: boolean);
 }
 
 // интерфейс данных ответа сервера на создание заказа
@@ -123,8 +116,8 @@ export interface IOrderResult {
 }
 // Модальное окно
 export interface IModal {
-	content: HTMLElement;
-	render(content: IModal): HTMLElement;
+	set content(content: HTMLElement);
+	render(content: ModalRender): HTMLElement;
 	open(): void;
 	close(): void;
 }

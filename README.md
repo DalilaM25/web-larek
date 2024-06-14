@@ -47,7 +47,12 @@ yarn build
 Тип для описания категории товара
 
 ```
-export type Category =  'софт-скил' | 'хард-скил' | 'дополнительное' | 'другое' | 'кнопка';
+export type Category =
+	| 'софт-скил'
+	| 'хард-скил'
+	| 'дополнительное'
+	| 'другое'
+	| 'кнопка';
 ```
 товар
 ```
@@ -63,58 +68,59 @@ export interface IProduct {
 ```
 карточка товара
 ```
-export interface ICardOfProduct extends IProduct {
-    set price(price: number | null)
-    set category(text: Category)
-    set image(link: string)
-    set title(text: string)
-    set description(text: string)
-    set buttonName(value: string)
+export interface ICardOfProduct {
+    set price(price: number | null);
+	set category(text: Category);
+	set image(link: string);
+	set title(text: string);
+	set description(text: string);
+	set buttonName(value: string);
 }
 ```
 Интерфейс данных приложения
 ```
 interface IAppState {
-    cardList: IProduct[]; 
-    basket: IProduct[]; 
-    order: IOrder | null; 
-    preview: string | null;
-    formErrors: FormErrors;
-    isBasketEmpty(): boolean;
-    createCardList(cards: IProduct[]) : void;
-    totalPrice(): number;
-    addBasket(product: IProduct): void;
-    remBasket(product: IProduct): void;
-    addOrder(): void;
-    clearBasket(): void;
-    getItemsInBasket(): IProduct[];
-    getBasketProductIndex(product: IProduct): number;
-    setButtonText(product: IProduct):string;
-    setPayment(value: string):void;
-    setAddress(value: string):void;
-	setPreview(product: IProduct) :void;
-    setOrderField(field: keyof Pick<IOrder, 'address' | 'phone' | 'email'>,value: string):void;
-    validateOrder():void;
+    cardList: IProduct[];
+	basket: IProduct[];
+	order: IOrder | null;
+	preview: string | null;
+	formErrors: FormErrors;
+	isBasketEmpty(): boolean;
+	createCardList(cards: IProduct[]): void;
+	totalPrice(): number;
+	addBasket(product: IProduct): void;
+	remBasket(product: IProduct): void;
+	getOrder(): void;
+	clearBasket(): void;
+	getItemsInBasket(): IProduct[];
+	getBasketProductIndex(product: IProduct): number;
+	setPayment(value: string): void;
+	setAddress(value: string): void;
+	setPreview(product: IProduct): void;
+	setOrderField(
+		field: keyof Pick<IOrder, 'address' | 'phone' | 'email'>,
+		value: string
+	): void;
+	validateOrder(): boolean;
 }
 ```
 Интерфейс окна формы
 ```
-interface IForm<T> {
-    errors: string[]; 
-    valid: boolean;
-    render?(data: Partial<T> & IForm<T>):void;
-    inputChange?(field: keyof T, value: string):void;
-}
+ interface IForm<T> {
+	set errors(value: string);
+	set valid(value: boolean);
+	render(data: Partial<T> & IForm<T>): void;
+ }
 ```
 Интерфейс модального окна заказа
 ```
 interface IDeliveryForm {
-    onlinePayment?: HTMLButtonElement;
-	cashPayment?: HTMLButtonElement;
-    address: string; 
-    payment: string; 
-    addPayment?(value: HTMLElement):void;
-    remPayment?():void; 
+    get onlinePayment(): HTMLButtonElement;
+	get cashPayment(): HTMLButtonElement;
+	set address(value: string);
+	payment: string;
+	addPayment(value: HTMLElement): void;
+	remPayment(): void;
 }
 ```
 Интерфейс заполнения контактной информации
@@ -126,10 +132,12 @@ interface IContactForm {
 ```
 Интерфейс заказа
 ```
-interface IOrder extends IDeliveryForm, IContactForm {
-    items: string[]; 
-    total: number; 
-}
+interface IOrder
+	extends Omit<
+			IDeliveryForm,
+			'addPayment' | 'remPayment' | 'onlinePayment' | 'cashPayment'
+		>,
+		IContactForm {}
 ```
 
 Интерфейс валидации формы
@@ -139,19 +147,14 @@ type FormErrors = Partial<Record<keyof IOrder, string>>;
 Интерфейс корзины
 ```
 interface IBasket {
-    basketList: HTMLElement; 
-    totalCost: number; 
-    basketButton: HTMLButtonElement;
-    products: HTMLElement[];
-    cost: number;
+    set products(products: HTMLElement[]);
+	set cost(cost: number);
 }
 ```
 Интерфейс успешное оформление заказа
 ```
 interface IOrderSuccess {
-    closeButton: HTMLButtonElement;
-    totalSpent: HTMLElement;
-    count: number; 
+    set count(total: number | string);
 }
 ```
 Интерфейс действий над карточкой
@@ -170,13 +173,9 @@ interface ISuccessOperation {
 интерфейс главной страницы
 ```
 interface IPage {
-    _wrapper: HTMLElement;
-    _basket: HTMLElement;
-    _counter: HTMLElement;
-    _catalog: HTMLElement;
-    catalog: HTMLElement[];
-    counter: number;
-    locked: boolean;
+    set catalog(items: HTMLElement[]);
+	set counter(value: number);
+	set locked(value: boolean);
 }
 ```
 Интерфейс данных ответа сервера на создание заказа
@@ -186,7 +185,15 @@ interface IOrderResult {
 	total: number;
 }
 ```
-
+Интерфейс модального окна
+```
+interface IModal {
+	set content(content: HTMLElement);
+	render(content: IModal): HTMLElement;
+	open(): void;
+	close(): void;
+}
+```
 
 ## Архитектура приложения
 
@@ -221,33 +228,29 @@ interface IOrderResult {
 - `setImage(element: HTMLImageElement, src: string, alt?: string)` — Установить изображение с альтернативным текстом
 - `render(data?: Partial<T>)` — Вернуть корневой DOM-элемент
 
-#### Класс Model 
-Класс для слоя данных. Связывает данные и события о которых нужно уведомлять подписчиков.
-Конструктор принимает данные `data: Partial<T>` и события `events: IEvents`. Есть метод `emitChanges` - вызывает метод emit базового класса Events и сообщает об изменении данных.
 
 ### Слой данных (реализация слоя Model)
 
 #### Класс AppState
-Класс для хранения данных и работы с данными. Позволяет получать, хранить, удалять данные, а так же осуществлять другие необходимые действия, которые станут необходимы в ходе реализации приложения. Наследует класс Model.
-
+Класс для хранения данных и работы с данными. Позволяет получать, хранить, удалять данные, а так же осуществлять другие необходимые действия, которые станут необходимы в ходе реализации приложения. 
+Конструктор принимает:
+- `events: IEvents` — объект событий
 Свойства:
 - `cardList: IProduct[]` - массив товаров
-- `basket: IProduct[]` - массив товаров в корзине
-- `order: IOrder | null` - заказ для отправки на сервер
-- `preview: string | null`- 
-- `formErrors: FormErrors` - 
- 
+- `basket: IProduct[]` - массив товаров в корзине 
+- `protected formErrors: FormErrors` - ошибки валидации форм 
+- `protected preview: string | null` - id карточки для превью 
+- `protected order: IOrder` - информация заказа 
 Методы:
 - `isBasketEmpty(): boolean` - проверяет пустоту корзины
 - `createCardList(cards: IProduct[]) : void` - добавляет карточки товаров в массив
 - `totalPrice(): number` - считает общую стоимость товаров в корзине
 - `addBasket(product: IProduct): void` - добавляет товар в корзину
 - `remBasket(product: IProduct): void` - удаляет товар из корзины
-- `addOrder(): void` - сохраняет данные заказа
+- `getOrder(): void` - создает объект заказа 
 - `clearBasket(): void` - очищает всю корзину
 - `getItemsInBasket(): IProduct[]` - получить продукты в корзине
 - `getBasketProductIndex(product: IProduct): number` - получить индекс продукта в корзине
-- `setButtonText(product: IProduct):string` - меняет текст кнопки
 - `setPayment(value: string):void` - установить способ оплаты
 - `setAddress(value: string):void` - установить адресс
 - `setPreview(product: IProduct) :void` - устаналивает в параметре превью id выбранной карточки
@@ -272,10 +275,10 @@ interface IOrderResult {
 
 Свойства:
 
-_wrapper: HTMLElement - контейнер для блока скролла при открытом модальном окне
-_basket: HTMLElement - элемент корзины
-_counter: HTMLElement - элемент счетчика корзины
-_catalog: HTMLElement - контейнер для отображения карточек
+- `protected _wrapper: HTMLElement` - контейнер для блока скролла при открытом модальном окне
+- `protected _basket: HTMLElement` - элемент корзины
+- `protected _counter: HTMLElement` - элемент счетчика корзины
+- `protected _catalog: HTMLElement` - контейнер для отображения карточек
 
 Методы:
 - `set catalog(items: HTMLElement[])` — добавляет каталог товаров на главной странице
@@ -289,14 +292,15 @@ _catalog: HTMLElement - контейнер для отображения кар�
 Конструктор принимает:
 
 - `container: HTMLElement` — контейнер для вставки карточки
+- `operation?: IOperation` — действие над карточкой
 
 Свойства:
-- `_category: HTMLElement` — категория товара
-- `_title: HTMLElement` — наименование товара
-- `_text: HTMLElement | null;` - описание товара
-- `_image: HTMLImageElement` — изображение товара
-- `_price: HTMLElement | null` — цена товара
-- `_button: HTMLButtonElement | null` - кнопка
+- `protected _category: HTMLElement` — категория товара
+- `protected _title: HTMLElement` — наименование товара
+- `protected _text: HTMLElement | null;` - описание товара
+- `protected _image: HTMLImageElement` — изображение товара
+- `protected _price: HTMLElement | null` — цена товара
+- `protected _button: HTMLButtonElement | null` - кнопка
 Методы:
 - `set price(price: number | null)` — установить цену
 - `set category(text: CategoryColorsList)` — установить категорию 
@@ -314,9 +318,9 @@ _catalog: HTMLElement - контейнер для отображения кар�
 - `events: EventEmitter` — объект событий
 
 Свойства:
-- `basketList: HTMLElement` — список товаров в корзине
-- `totalCost: HTMLElement | null` — элемент с финальной ценой
-- `basketButton: HTMLButtonElement` — элемент кнопки
+- `protected basketList: HTMLElement` — список товаров в корзине
+- `protected totalCost: HTMLElement | null` — элемент с финальной ценой
+- `protected basketButton: HTMLButtonElement` — элемент кнопки
 
 Методы:
 - `set products(products: HTMLElement[])` — установить список товаров 
@@ -327,27 +331,27 @@ _catalog: HTMLElement - контейнер для отображения кар�
 Класс для работы с формами. Предоставляет функционал для проверки форм, валидации, рендера результата.
 
 Свойства:
-- `submitButton: HTMLButtonElement` — кнопка отправки формы
-- `formErrors: HTMLElement` — элемент для отображения ошибки
+- `protected submitButton: HTMLButtonElement` — кнопка отправки формы
+- `protected formErrors: HTMLElement` — элемент для отображения ошибки
 
 Методы:
 - `set valid(value: boolean)` - установка значения валидности
 - `set errors(value: string)` - передача ошибок в форме
-- `render?(data: Partial<T> & IForm): void` - отрисовка формы
-- `inputChange?(field: keyof T, value: string):void`- валидация поля
+- `render(data: Partial<T> & IForm): void` - отрисовка формы
+- `protected inputChange(field: keyof T, value: string):void`- валидация поля
 
 #### Класс DeliveryForm 
 
 Класс для работы с формой заказа товара. Расширяет класс Form.
 
 Свойства класса:
-- `onlinePayment?: HTMLButtonElemen` — кнопка онлайн оплаты
-- `сashPayment?: HTMLButtonElemen` — кнопка оплаты при получении
-- `payment: string` — способ оплаты
+- `protected _onlinePayment: HTMLButtonElement` — элемент выбора оплаты онлайн
+- `protected _cashPayment: HTMLButtonElement` — элемент выбора оплаты при получении
+- `payment: string` — название способа оплаты
 Методы:
 - `set address(text: string)` — устанавливает адрес доставки
 - `addPayment(value: HTMLElement): void ` — устанавливает способ оплаты
-- `remPayment?():void ` — снимает способ оплаты
+- `remPayment():void ` — снимает способ оплаты
 
 #### Класс ContactForm 
 
@@ -370,8 +374,8 @@ _catalog: HTMLElement - контейнер для отображения кар�
 - `events: IEvents`
 
 Свойства:
-- `closeButton: HTMLButtonElement` — кнопка закрытия окна
-- `totalSpent: HTMLElement` — общее число синапсов
+- `protected closeButton: HTMLButtonElement` — кнопка закрытия окна
+- `protected totalSpent: HTMLElement` — общее число синапсов
 
 Методы:
 - `set count(total: number | string)` — устанавливает списанное число синапсов
@@ -385,11 +389,11 @@ _catalog: HTMLElement - контейнер для отображения кар�
 - `events: IEvents` — объект событий
 
 Свойства:
-- `button: HTMLButtonElement` - кнопка модального окна
-- `сontent: HTMLElement` - содержимое модального окна
+- `protected button: HTMLButtonElement` - кнопка модального окна
+- `protected сontent: HTMLElement` - содержимое модального окна
 
 Методы:
 - `set content(content: HTMLElement): void` - устанавливает содержимое в модальном окне
-- `render?(content: IModal): HTMLElement ` - отрисовывает модальное окно
-- `open?(): void` - открыть модальное окно
-- `close?(): void` - закрыть модальное окно
+- `render(content: ModalRender): HTMLElement ` - отрисовывает модальное окно
+- `open(): void` - открыть модальное окно
+- `close(): void` - закрыть модальное окно

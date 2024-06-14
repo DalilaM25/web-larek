@@ -3,10 +3,10 @@ import { IEvents } from './base/events';
 
 export class AppState implements IAppState {
 	cardList: IProduct[];
-	formErrors: FormErrors = {};
 	basket: IProduct[] = [];
-	preview: string | null;
-	order: IOrder = {
+	protected formErrors: FormErrors = {};
+	protected preview: string | null;
+	protected order: IOrder = {
 		payment: '',
 		address: '',
 		phone: '',

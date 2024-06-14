@@ -3,11 +3,6 @@ import {Component} from './base/Component';
 import {EventEmitter} from './base/events';
 import {createElement, ensureElement} from "../utils/utils";
 
-export interface IBasketView {
-    basketList: HTMLElement;
-    totalCost: HTMLElement;
-    basketButton: HTMLButtonElement;
-}
 
 export class Basket extends Component<never> implements IBasket{
     protected basketList: HTMLElement;
