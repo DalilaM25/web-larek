@@ -18,12 +18,12 @@ export interface IProduct {
 
 //Карточка товара
 export interface ICardOfProduct {
-	set price(price: number | null);
-	set category(text: Category);
-	set image(link: string);
-	set title(text: string);
-	set description(text: string);
-	set buttonName(value: string);
+	price: number | null;
+	category: Category;
+	image: string;
+	title: string;
+	description: string;
+	buttonName: string;
 }
 
 //Интерфейс данных приложения
@@ -51,15 +51,15 @@ export interface IAppState {
 
 //интерфейс окна формы
 export interface IForm<T> {
-	set errors(value: string);
-	set valid(value: boolean);
+	errors: string;
+	valid: boolean;
 	render(data: Partial<T> & IForm<T>): void;
 }
 
 //интерфейс модального окна заказа
 export interface IDeliveryForm {
 	payment: string;
-	set address(value: string);
+	address: string;
 	addPayment(value: HTMLElement): void;
 	remPayment(): void;
 }
@@ -83,13 +83,13 @@ export type FormErrors = Partial<Record<keyof IOrder, string>>;
 
 //интерфейс корзины
 export interface IBasket {
-	set products(products: HTMLElement[]);
-	set cost(cost: number);
+	products: HTMLElement[];
+	cost: number;
 }
 
 //интерфейс успешное оформление заказа
 export interface IOrderSuccess {
-	set count(total: number | string);
+	count: number | string;
 }
 
 //интерфейс действий над карточкой
@@ -104,9 +104,9 @@ export interface ISuccessOperation {
 
 //интерфейс главной страницы
 export interface IPage {
-	set catalog(items: HTMLElement[]);
-	set counter(value: number);
-	set locked(value: boolean);
+	catalog: HTMLElement[];
+	counter: number;
+	locked: boolean;
 }
 
 // интерфейс данных ответа сервера на создание заказа
@@ -116,7 +116,7 @@ export interface IOrderResult {
 }
 // Модальное окно
 export interface IModal {
-	set content(content: HTMLElement);
+	content: HTMLElement;
 	render(content: ModalRender): HTMLElement;
 	open(): void;
 	close(): void;
